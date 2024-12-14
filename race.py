@@ -1,6 +1,6 @@
-
+# race.py
 import pygame, random, sys
-from constants import DARK_BG, ACCENT, SCREEN_WIDTH, GREEN
+from constants import DARK_BG, ACCENT, SCREEN_WIDTH, GREEN, FONT_LARGE, FONT_MEDIUM
 from graphics import draw_track
 from utils import draw_text
 
