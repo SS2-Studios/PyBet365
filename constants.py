@@ -1,14 +1,29 @@
 import pygame
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
-DARK_BG = (24, 26, 27) 
-ACCENT = (30, 144, 255)  
-LIGHT_TEXT = (200, 200, 200)
-GREEN = (50, 205, 50)
-RED = (255, 69, 58)
-GRAY = (75, 75, 75)
+
+# Boje
+DARK_BG = (15, 20, 45)  # Lepša tamno plava pozadina
+ACCENT = (255, 140, 0)  # Narančasta za hover i naglaske
+LIGHT_TEXT = (240, 240, 240)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-pygame.init()  
-FONT_SMALL = pygame.font.SysFont("Arial", 22)
-FONT_MEDIUM = pygame.font.SysFont("Arial", 26)
-FONT_LARGE = pygame.font.SysFont("Arial", 36)
+GRAY = (100, 100, 100)
+FINISH_LINE = (255, 255, 255)
+
+# Rezolucija
+SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1080
+
+# Fontovi
+pygame.font.init()
+FONT_TITLE = pygame.font.SysFont("Arial", 72, bold=True)
+FONT_LARGE = pygame.font.SysFont("Arial", 48, bold=True)
+FONT_MEDIUM = pygame.font.SysFont("Arial", 36)
+FONT_SMALL = pygame.font.SysFont("Arial", 28)
+
+# Trkalište
+TRACK_Y_START = 300
+TRACK_Y_GAP = 150
+FINISH_LINE_X = SCREEN_WIDTH - 200
+
+# Brzina i FPS
+FPS = 60
+RACE_SPEED = 6
