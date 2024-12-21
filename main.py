@@ -31,9 +31,11 @@ selected_team = None
 bet_amount = 0
 balance = 1000
 
-# Učitavanje slike konja
+# Učitavanje slika konja i pozadine trkališta
 horse_image = pygame.image.load("horse.png")
 horse_image = pygame.transform.scale(horse_image, (60, 60))
+track_background = pygame.image.load("track_background.jpg")  # Slika trkališta, zemlja/pesak
+track_background = pygame.transform.scale(track_background, (SCREEN_WIDTH, SCREEN_HEIGHT))  # Prilagodimo pozadinu
 
 # Učitajte zvukove
 horse_running_sound = pygame.mixer.Sound("horse_running.wav")  # Zvuk trčanja konja
@@ -79,6 +81,7 @@ def race_animation():
     # Dok traje start_race zvuk, konji ne pomeraju
     while pygame.time.get_ticks() - time_started < start_time * 1000:
         screen.fill(DARK_BG)
+        screen.blit(track_background, (0, 0))  # Postavljanje pozadine trkališta
         draw_text("Trka konja!", font, ACCENT, screen, SCREEN_WIDTH // 2, 50, center=True)
 
         # Crtanje finish linije
@@ -102,6 +105,7 @@ def race_animation():
 
     while running:
         screen.fill(DARK_BG)
+        screen.blit(track_background, (0, 0))  # Postavljanje pozadine trkališta
         draw_text("Trka konja!", font, ACCENT, screen, SCREEN_WIDTH // 2, 50, center=True)
 
         # Crtanje finish linije
@@ -183,15 +187,23 @@ def main():
 
         # Faza 2: Unos uloga
         elif stage == "bet_input":
-            draw_text("Unesite iznos uloga:", font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 150, center=True)
-            pygame.draw.rect(screen, GRAY, (SCREEN_WIDTH // 2 - 100, 200, 200, 50), border_radius=10)
-            draw_text(user_input, font, DARK_BG, screen, SCREEN_WIDTH // 2, 225, center=True)
+            draw_text(f"Vaš balans: {balance} €", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 100, center=True)
+            draw_text("Unesite iznos uloga ili odaberite opciju:", font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 150, center=True)
+            
+            # Prikazivanje dugmadi za procente
+            button_25 = draw_button(f"25% Balansa", (SCREEN_WIDTH - 400) // 2, 230, 400, 60, GRAY, ACCENT, mouse_pos, screen, False)
+            button_50 = draw_button(f"50% Balansa", (SCREEN_WIDTH - 400) // 2, 310, 400, 60, GRAY, ACCENT, mouse_pos, screen, False)
+            button_75 = draw_button(f"75% Balansa", (SCREEN_WIDTH - 400) // 2, 390, 400, 60, GRAY, ACCENT, mouse_pos, screen, False)
+            button_100 = draw_button(f"100% Balansa", (SCREEN_WIDTH - 400) // 2, 470, 400, 60, GRAY, ACCENT, mouse_pos, screen, False)
+            
+            pygame.draw.rect(screen, GRAY, (SCREEN_WIDTH // 2 - 100, 550, 200, 50), border_radius=10)
+            draw_text(user_input, font, DARK_BG, screen, SCREEN_WIDTH // 2, 575, center=True)
 
             # Prikazivanje greške ako se unese 0 ili previše novca
             if user_input == "0":
-                draw_text("Molimo unesite ulog veći od 0!", small_font, RED, screen, SCREEN_WIDTH // 2, 275, center=True)
+                draw_text("Molimo unesite ulog veći od 0!", small_font, RED, screen, SCREEN_WIDTH // 2, 625, center=True)
             elif user_input.isdigit() and int(user_input) > balance:
-                draw_text("Nemate dovoljno novca!", small_font, RED, screen, SCREEN_WIDTH // 2, 275, center=True)
+                draw_text("Nemate dovoljno novca!", small_font, RED, screen, SCREEN_WIDTH // 2, 625, center=True)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -222,6 +234,21 @@ def main():
                         user_input = user_input[:-1]
                     elif event.unicode.isdigit():
                         user_input += event.unicode
+                        
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    # Prikazivanje procenta uloga kada korisnik klikne na dugme
+                    if button_25.collidepoint(mouse_pos):
+                        bet_amount = int(balance * 0.25)
+                        user_input = str(bet_amount)
+                    elif button_50.collidepoint(mouse_pos):
+                        bet_amount = int(balance * 0.50)
+                        user_input = str(bet_amount)
+                    elif button_75.collidepoint(mouse_pos):
+                        bet_amount = int(balance * 0.75)
+                        user_input = str(bet_amount)
+                    elif button_100.collidepoint(mouse_pos):
+                        bet_amount = balance
+                        user_input = str(bet_amount)
 
         # Faza 3: Rezultat trke
         elif stage == "result":
