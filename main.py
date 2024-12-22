@@ -53,18 +53,27 @@ def draw_text(text, font, color, surface, x, y, center=False):
         text_rect.topleft = (x, y)
     surface.blit(text_obj, text_rect)
 
-# Funkcija za crtanje dugmeta
-def draw_button(text, x, y, min_width, height, color, hover_color, mouse_pos, surface, active):
-    # Računanje dužine teksta i širine dugmadi
-    text_width = font.size(text)[0] + 40  # Dodajemo 40 piksela za padding
-    button_width = max(min_width, text_width)  # Širina dugmeta zavisi od dužine teksta
-    
-    rect_color = hover_color if active else color
-    pygame.draw.rect(surface, rect_color, (x, y, button_width, height), border_radius=8)
-    
-    draw_text(text, small_font, WHITE, surface, x + button_width // 2, y + height // 2, center=True)
-    
-    return pygame.Rect(x, y, button_width, height)
+# Funkcija za crtanje dugmadi sa centriranim tekstom
+def draw_button_with_text(text, x, y, font, text_color, bg_color, surface):
+    """
+    Funkcija koja crta pravougaonik sa centriranim tekstom
+    """
+    text_surface = font.render(text, True, text_color)
+    text_width = text_surface.get_width()
+    text_height = text_surface.get_height()
+
+    # Podesite širinu dugmeta prema dužini teksta
+    button_width = text_width + 20  # Dodajte margine sa strane
+    button_height = text_height + 10  # Dodajte margine gore i dole
+
+    # Crtanje pozadine dugmeta
+    pygame.draw.rect(surface, bg_color, (x - button_width // 2, y - button_height // 2, button_width, button_height), border_radius=10)
+
+    # Crtanje teksta
+    surface.blit(text_surface, (x - text_width // 2, y - text_height // 2))
+
+    # Vratite poziciju dugmeta
+    return pygame.Rect(x - button_width // 2, y - button_height // 2, button_width, button_height)
 
 # Funkcija za trku konja
 def race_animation():
@@ -171,8 +180,8 @@ def main():
             y_offset = 240
             buttons = []
             for i, team in enumerate(teams):
-                border_color = ACCENT if selected_team == team else GRAY
-                button = draw_button(f"{team} - Kvote: {team_odds[team]}", (SCREEN_WIDTH - 400) // 2, y_offset + i * 80, 400, 60, GRAY, border_color, mouse_pos, screen, selected_team == team)
+                text = f"{team} - Kvote: {team_odds[team]}"
+                button = draw_button_with_text(text, SCREEN_WIDTH // 2, y_offset + i * 80, font, LIGHT_TEXT, GRAY, screen)
                 buttons.append((button, team))
 
             for event in pygame.event.get():
@@ -189,13 +198,13 @@ def main():
         elif stage == "bet_input":
             draw_text(f"Vaš balans: {balance} €", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 100, center=True)
             draw_text("Unesite iznos uloga ili odaberite opciju:", font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 150, center=True)
-            
+
             # Prikazivanje dugmadi za procente
-            button_25 = draw_button(f"25% Balansa", (SCREEN_WIDTH - 400) // 2, 230, 400, 60, GRAY, ACCENT, mouse_pos, screen, False)
-            button_50 = draw_button(f"50% Balansa", (SCREEN_WIDTH - 400) // 2, 310, 400, 60, GRAY, ACCENT, mouse_pos, screen, False)
-            button_75 = draw_button(f"75% Balansa", (SCREEN_WIDTH - 400) // 2, 390, 400, 60, GRAY, ACCENT, mouse_pos, screen, False)
-            button_100 = draw_button(f"100% Balansa", (SCREEN_WIDTH - 400) // 2, 470, 400, 60, GRAY, ACCENT, mouse_pos, screen, False)
-            
+            button_25 = draw_button_with_text(f"25% Balansa", SCREEN_WIDTH // 2, 230, small_font, LIGHT_TEXT, ACCENT, screen)
+            button_50 = draw_button_with_text(f"50% Balansa", SCREEN_WIDTH // 2, 310, small_font, LIGHT_TEXT, ACCENT, screen)
+            button_75 = draw_button_with_text(f"75% Balansa", SCREEN_WIDTH // 2, 390, small_font, LIGHT_TEXT, ACCENT, screen)
+            button_100 = draw_button_with_text(f"100% Balansa", SCREEN_WIDTH // 2, 470, small_font, LIGHT_TEXT, ACCENT, screen)
+
             pygame.draw.rect(screen, GRAY, (SCREEN_WIDTH // 2 - 100, 550, 200, 50), border_radius=10)
             draw_text(user_input, font, DARK_BG, screen, SCREEN_WIDTH // 2, 575, center=True)
 
@@ -205,55 +214,52 @@ def main():
             elif user_input.isdigit() and int(user_input) > balance:
                 draw_text("Nemate dovoljno novca!", small_font, RED, screen, SCREEN_WIDTH // 2, 625, center=True)
 
+            # Prolaz kroz događaje
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if button_25.collidepoint(mouse_pos):
+                        bet_amount = balance * 0.25
+                        user_input = str(int(bet_amount))
+                    elif button_50.collidepoint(mouse_pos):
+                        bet_amount = balance * 0.50
+                        user_input = str(int(bet_amount))
+                    elif button_75.collidepoint(mouse_pos):
+                        bet_amount = balance * 0.75
+                        user_input = str(int(bet_amount))
+                    elif button_100.collidepoint(mouse_pos):
+                        bet_amount = balance
+                        user_input = str(int(bet_amount))
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN and user_input.isdigit():
-                        bet_amount = int(user_input)
-                        if bet_amount <= balance and bet_amount > 0:
-                            winner = race_animation()
-                            if winner == selected_team:
-                                # Koristi kvotu odabranog tima za izračunavanje dobitka
-                                odds = team_odds[selected_team]
-                                winnings = int(bet_amount * odds)
-                                balance += winnings
-                                result = f"Čestitamo! {winner} je pobijedio. Dobitak: {winnings} €."
-                                win_sound.play()  # Zvuk pobede kada pobedite
-                            else:
-                                balance -= bet_amount
-                                result = f"Žao nam je, {winner} je pobijedio. Izgubili ste {bet_amount} €."
-                                lose_sound.play()  # Zvuk gubitka kada izgubite
-                            stage = "result"
-                        elif bet_amount <= 0:
-                            result = "Ulog mora biti veći od 0!"
-                        elif bet_amount > balance:
-                            result = "Nemate dovoljno novca!"
-                    elif event.key == pygame.K_BACKSPACE:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                    if event.key == pygame.K_BACKSPACE:
                         user_input = user_input[:-1]
                     elif event.unicode.isdigit():
                         user_input += event.unicode
-                        
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    # Prikazivanje procenta uloga kada korisnik klikne na dugme
-                    if button_25.collidepoint(mouse_pos):
-                        bet_amount = int(balance * 0.25)
-                        user_input = str(bet_amount)
-                    elif button_50.collidepoint(mouse_pos):
-                        bet_amount = int(balance * 0.50)
-                        user_input = str(bet_amount)
-                    elif button_75.collidepoint(mouse_pos):
-                        bet_amount = int(balance * 0.75)
-                        user_input = str(bet_amount)
-                    elif button_100.collidepoint(mouse_pos):
-                        bet_amount = balance
-                        user_input = str(bet_amount)
 
-        # Faza 3: Rezultat trke
+                # Potvrda uloga
+                if user_input and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if bet_amount <= balance:
+                        balance -= bet_amount
+                        result = race_animation()  # Započnite trku
+                        if result == selected_team:
+                            winnings = bet_amount * team_odds[selected_team]
+                            balance += winnings
+                            win_sound.play()  # Zvuk kada pobedite
+                            stage = "result"
+                            draw_text(f"Čestitamo! Pobedili ste i osvojili {winnings:.2f} €!", font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
+                        else:
+                            lose_sound.play()  # Zvuk kada izgubite
+                            stage = "result"
+                            draw_text(f"Nažalost, izgubili ste {bet_amount:.2f} €.", font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
+
+        # Faza 3: Prikazivanje rezultata
         elif stage == "result":
-            draw_text(result, font, GREEN if "Čestitamo" in result else RED, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
-            draw_text("Pritisnite R za novu igru ili ESC za izlaz.", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50, center=True)
+            draw_text("Pritisnite R za povratak na klađenje ili ESC za izlazak.", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 400, center=True)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -262,9 +268,8 @@ def main():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
                         stage = "team_selection"
-                        selected_team = None
                         user_input = ""
-                    elif event.key == pygame.K_ESCAPE:
+                    if event.key == pygame.K_ESCAPE:
                         pygame.quit()
                         sys.exit()
 
