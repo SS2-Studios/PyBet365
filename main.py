@@ -1,4 +1,3 @@
-# main.py
 import pygame
 import random
 import sys
@@ -103,36 +102,38 @@ def main():
                         user_input = user_input[:-1]
                     elif event.unicode.isdigit():
                         user_input += event.unicode
-
-                if user_input and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if bet_amount <= balance:
-                        balance -= bet_amount
-                        result = race_animation(horse_image, track_background, team_odds, screen, font, small_font, {team: 50 for team in teams}, {team: random.randint(3, 5) for team in teams}, selected_team)
-                        
-                        if result == selected_team:
-                            winnings = bet_amount * team_odds[selected_team]
-                            balance += winnings
-                            win_sound.play()
-                            stage = "result"
-                            draw_text(f"Čestitamo! Pobjedili ste i osvojili {winnings:.2f} €!", font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
-                        else:
-                            lose_sound.play()
-                            stage = "result"
-                            draw_text(f"Nažalost, izgubili ste {bet_amount:.2f} €.", font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
+                    elif event.key == pygame.K_RETURN:
+                        if user_input and int(user_input) <= balance:
+                            bet_amount = int(user_input)  # Ažuriramo bet_amount sa korisničkim unosom
+                            balance -= bet_amount  # Oduzimamo ulog sa balansa
+                            result = race_animation(horse_image, track_background, team_odds, screen, font, small_font, {team: 50 for team in teams}, {team: random.randint(3, 5) for team in teams}, selected_team)
+                            
+                            if result == selected_team:
+                                winnings = bet_amount * team_odds[selected_team]
+                                balance += winnings
+                                win_sound.play()
+                                stage = "result"
+                                draw_text(f"Čestitamo! Pobijedili ste i osvojili {winnings:.2f} €!", font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
+                            else:
+                                lose_sound.play()
+                                stage = "result"
+                                draw_text(f"Nažalost, izgubili ste {bet_amount:.2f} €.", font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
 
         elif stage == "result":
             if result == selected_team:
                 winnings = bet_amount * team_odds[selected_team]
                 balance += winnings
-                win_message = f"Čestitamo! Pobjedili ste sa {selected_team} i osvojili {winnings:.2f} €!"
+                win_message = f"Čestitamo! Pobijedili ste sa {selected_team} i osvojili {winnings:.2f} €!"
                 draw_text(win_message, font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
                 win_sound.play()
             else:
-                lose_message = f"Nažalost, vaš {selected_team} je izgubio. Pobjednik je {result}."
+                lose_message = f"Nažalost, vaš {selected_team} je izgubio. Pobijednik je {result}."
                 draw_text(lose_message, font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
                 lose_sound.play()
 
-            draw_text("Pritisnite R za povratak na klađenje ili ESC za izlazak.", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 400, center=True)
+            draw_text(f"Vaš novi balans: {balance} €", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 400, center=True)
+            draw_text("Pritisnite R za povratak na klađenje ili ESC za izlazak.", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 450, center=True)
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
