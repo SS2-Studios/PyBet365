@@ -28,9 +28,6 @@ def main():
 
     clock = pygame.time.Clock()
 
-    # Multiplayer variables
-    client = None  # Placeholder for socket connection
-
     while True:
         screen.fill(DARK_BG)
         mouse_pos = pygame.mouse.get_pos()
@@ -107,64 +104,37 @@ def main():
                         user_input += event.unicode
                     elif event.key == pygame.K_RETURN:
                         if user_input and int(user_input) <= balance:
-                            bet_amount = int(user_input)
-                            balance -= bet_amount
-                            # Multiplayer stage
-                            try:
-                                client.send(f"BET|{selected_team}|{bet_amount}".encode())
-                                stage = "waiting_for_results"
-                            except Exception as e:
-                                print(f"Greška u komunikaciji sa serverom: {e}")
-                                pygame.quit()
-                                sys.exit()
-
-        elif stage == "waiting_for_results":
-            # Animacija trke
-            speeds = {team: random.randint(3, 5) for team in teams}
-            distances = {team: 50 for team in teams}
-            race_ongoing = True
-
-            while race_ongoing:
-                screen.fill(DARK_BG)
-                draw_text("Trka je u toku!", font, ACCENT, screen, SCREEN_WIDTH // 2, 50, center=True)
-                draw_track(screen, teams)
-
-                for team in teams:
-                    distances[team] += speeds[team]
-                    if distances[team] >= SCREEN_WIDTH - 150:  # Ciljna linija
-                        race_ongoing = False
-                        result = team
-                        break
-
-                draw_horses(screen, distances, horse_image, teams)
-
-                pygame.display.flip()
-                clock.tick(30)
-
-            # Nakon završetka animacije primamo rezultat od servera
-            try:
-                data = client.recv(1024).decode()  # Čekanje odgovora sa servera
-                if "|" in data:
-                    parts = data.split('|')
-                    if len(parts) == 3:
-                        command, winner, updated_balance = parts
-                        if command == "RESULT":
-                            if winner == selected_team:
-                                balance = int(updated_balance)
+                            bet_amount = int(user_input)  # Ažuriramo bet_amount sa korisničkim unosom
+                            balance -= bet_amount  # Oduzimamo ulog sa balansa
+                            result = race_animation(horse_image, track_background, team_odds, screen, font, small_font, {team: 50 for team in teams}, {team: random.randint(3, 5) for team in teams}, selected_team)
+                            
+                            if result == selected_team:
+                                winnings = bet_amount * team_odds[selected_team]  # Dobitak na osnovu uloga i kvote
+                                balance += winnings  # Dodajemo dobitak na balans, samo jednom
                                 win_sound.play()
                                 stage = "result"
+                                # Prikazujemo poruku o pobedi i tačan iznos dobitka
+                                draw_text(f"Čestitamo! Pobijedili ste i osvojili {winnings:.2f} €!", font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
                             else:
                                 lose_sound.play()
                                 stage = "result"
-            except Exception as e:
-                print(f"Greška u komunikaciji sa serverom: {e}")
-                pygame.quit()
-                sys.exit()
+                                draw_text(f"Nažalost, izgubili ste {bet_amount:.2f} €.", font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
+
 
         elif stage == "result":
-            draw_text(f"Vaš balans: {balance} €", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 100, center=True)
-            draw_text("Pritisnite R za povratak na klađenje ili ESC za izlazak.", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 400, center=True)
+            if result == selected_team:
+                winnings = bet_amount * team_odds[selected_team]
+                win_message = f"Čestitamo! Pobijedili ste sa {selected_team} i osvojili {winnings:.2f} €!"
+                draw_text(win_message, font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
+                win_sound.play()
+            else:
+                lose_message = f"Nažalost, vaš {selected_team} je izgubio. Pobijednik je {result}."
+                draw_text(lose_message, font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
+                lose_sound.play()
 
+            # Ovdje ne ispisujemo balans više, samo ostale poruke
+            draw_text("Pritisnite R za povratak na klađenje ili ESC za izlazak.", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 400, center=True)
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
