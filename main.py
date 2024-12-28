@@ -258,7 +258,21 @@ def main():
                             draw_text(f"Nažalost, izgubili ste {bet_amount:.2f} €.", font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
 
         # Faza 3: Prikazivanje rezultata
+        # Faza 3: Prikazivanje rezultata
+        # Faza 3: Prikazivanje rezultata
         elif stage == "result":
+            if result == selected_team:
+                winnings = bet_amount * team_odds[selected_team]
+                balance += winnings
+                win_message = f"Čestitamo! Pobedili ste sa konjem {selected_team} i osvojili {winnings:.2f} €!"
+                draw_text(win_message, font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
+                win_sound.play()  # Zvuk kada pobedite
+            else:
+                # Smanjenje balansa je već uračunato tokom klađenja, tako da ovde samo ispisujemo poruku
+                lose_message = f"Nažalost, vaš konj {selected_team} je izgubio. Pobednik je {result}."
+                draw_text(lose_message, font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
+                lose_sound.play()  # Zvuk kada izgubite
+
             draw_text("Pritisnite R za povratak na klađenje ili ESC za izlazak.", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 400, center=True)
 
             for event in pygame.event.get():
@@ -272,6 +286,7 @@ def main():
                     if event.key == pygame.K_ESCAPE:
                         pygame.quit()
                         sys.exit()
+
 
         pygame.display.flip()
         clock.tick(30)
