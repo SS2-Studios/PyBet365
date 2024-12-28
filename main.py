@@ -109,21 +109,21 @@ def main():
                             result = race_animation(horse_image, track_background, team_odds, screen, font, small_font, {team: 50 for team in teams}, {team: random.randint(3, 5) for team in teams}, selected_team)
                             
                             if result == selected_team:
-                                winnings = bet_amount * team_odds[selected_team]  # Ispravno izračunavanje dobitka
-                                balance += winnings  # Dodajemo dobitak na balans
+                                winnings = bet_amount * team_odds[selected_team]  # Dobitak na osnovu uloga i kvote
+                                balance += winnings  # Dodajemo dobitak na balans, samo jednom
                                 win_sound.play()
                                 stage = "result"
+                                # Prikazujemo poruku o pobedi i tačan iznos dobitka
                                 draw_text(f"Čestitamo! Pobijedili ste i osvojili {winnings:.2f} €!", font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
-
                             else:
                                 lose_sound.play()
                                 stage = "result"
                                 draw_text(f"Nažalost, izgubili ste {bet_amount:.2f} €.", font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
 
+
         elif stage == "result":
             if result == selected_team:
                 winnings = bet_amount * team_odds[selected_team]
-                balance += winnings
                 win_message = f"Čestitamo! Pobijedili ste sa {selected_team} i osvojili {winnings:.2f} €!"
                 draw_text(win_message, font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
                 win_sound.play()
@@ -132,8 +132,8 @@ def main():
                 draw_text(lose_message, font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
                 lose_sound.play()
 
-            draw_text(f"Vaš novi balans: {balance} €", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 400, center=True)
-            draw_text("Pritisnite R za povratak na klađenje ili ESC za izlazak.", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 450, center=True)
+            # Ovdje ne ispisujemo balans više, samo ostale poruke
+            draw_text("Pritisnite R za povratak na klađenje ili ESC za izlazak.", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 400, center=True)
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
