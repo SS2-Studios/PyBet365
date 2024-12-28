@@ -195,7 +195,7 @@ def main():
                             balance += winnings
                             win_sound.play()
                             stage = "result"
-                            draw_text(f"Čestitamo! Pobedili ste i osvojili {winnings:.2f} €!", font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
+                            draw_text(f"Čestitamo! Pobjedili ste i osvojili {winnings:.2f} €!", font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
                         else:
                             lose_sound.play()
                             stage = "result"
@@ -204,11 +204,11 @@ def main():
             if result == selected_team:
                 winnings = bet_amount * team_odds[selected_team]
                 balance += winnings
-                win_message = f"Čestitamo! Pobedili ste sa konjem {selected_team} i osvojili {winnings:.2f} €!"
+                win_message = f"Čestitamo! Pobjedili ste sa {selected_team} i osvojili {winnings:.2f} €!"
                 draw_text(win_message, font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
                 win_sound.play()
             else:
-                lose_message = f"Nažalost, vaš konj {selected_team} je izgubio. Pobednik je {result}."
+                lose_message = f"Nažalost, vaš {selected_team} je izgubio. Pobjednik je {result}."
                 draw_text(lose_message, font, RED, screen, SCREEN_WIDTH // 2, 300, center=True)
                 lose_sound.play()
             draw_text("Pritisnite R za povratak na klađenje ili ESC za izlazak.", small_font, LIGHT_TEXT, screen, SCREEN_WIDTH // 2, 400, center=True)
