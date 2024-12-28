@@ -109,11 +109,12 @@ def main():
                             result = race_animation(horse_image, track_background, team_odds, screen, font, small_font, {team: 50 for team in teams}, {team: random.randint(3, 5) for team in teams}, selected_team)
                             
                             if result == selected_team:
-                                winnings = bet_amount * team_odds[selected_team]
-                                balance += winnings
+                                winnings = bet_amount * team_odds[selected_team]  # Ispravno izračunavanje dobitka
+                                balance += winnings  # Dodajemo dobitak na balans
                                 win_sound.play()
                                 stage = "result"
                                 draw_text(f"Čestitamo! Pobijedili ste i osvojili {winnings:.2f} €!", font, GREEN, screen, SCREEN_WIDTH // 2, 300, center=True)
+
                             else:
                                 lose_sound.play()
                                 stage = "result"
