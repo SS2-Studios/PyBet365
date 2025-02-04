@@ -1,7 +1,6 @@
 import pygame
 import random
 import sys
-from pybet365_ui_ux import main_menu
 from config import *
 from utils import *
 from assets import *
@@ -152,4 +151,4 @@ def main():
         clock.tick(30)
 
 if __name__ == "__main__":
-    main_menu() 
+    main()
